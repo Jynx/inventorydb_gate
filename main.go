@@ -2,13 +2,15 @@ package main
 
 import (
 	"context"
-	pb "github.com/Jynx/inventoryProtos/inventory"
-	"go.mongodb.org/mongo-driver/mongo/options"
-	"google.golang.org/grpc"
+	"fmt"
 	"log"
 	"net"
 	"playerInventory/inventorydb"
 	"time"
+
+	pb "github.com/Jynx/inventoryProtos/inventory"
+	"go.mongodb.org/mongo-driver/mongo/options"
+	"google.golang.org/grpc"
 )
 
 func main() {
@@ -29,9 +31,12 @@ func main() {
 	pb.RegisterInventoryServiceServer(server, client)
 
 	log.Printf("gRPC server listening on %s", listenAddr)
-	client.CreateInventory(ctx, &pb.CreateInventoryRequest{})
 	if err := server.Serve(lis); err != nil {
 		log.Fatalf("failed to serve: %v", err)
 	}
-
+	resp, createErr := client.CreateInventory(ctx, &pb.CreateInventoryRequest{})
+	if createErr != nil {
+		log.Fatalf("failed to create inventory: %v", createErr)
+	}
+	fmt.Print(resp)
 }
