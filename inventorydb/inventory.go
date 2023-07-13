@@ -3,20 +3,11 @@ package inventorydb
 import (
 	"context"
 	"fmt"
+
 	pb "github.com/Jynx/inventoryProtos/inventory"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
-
-// will encapsulate a database connection
-// this needs to be testable, so we'll need some sort of interface to describe a client.
-// TODO: connectionstring/password comes from config.
-// TODO: Tests
-// TODO: Crud operations
-// TODO: better error handling/returns on client init
-// TODO: DB agnostic somehow?
-// TODO: transactions, omnipotent
-// TODO: https://protobuf.dev/programming-guides/api/#prefer-idempotency
 
 type DbClient struct {
 	client *mongo.Client

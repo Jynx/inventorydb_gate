@@ -5,38 +5,58 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"playerInventory/config"
 	"playerInventory/inventorydb"
 	"time"
 
 	pb "github.com/Jynx/inventoryProtos/inventory"
+	"github.com/joho/godotenv"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"google.golang.org/grpc"
 )
 
+func init() {
+	if err := godotenv.Load(); err != nil {
+		log.Fatalf("Failed to load env file with error: %s", err)
+	}
+}
+
 func main() {
-	listenAddr := ":50051"
+	config := config.NewConfig()
+
+	listenAddr := ":" + config.Server.Port
 	lis, err := net.Listen("tcp", listenAddr)
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
 
+	_, _ err := NewInventoryDbClient(listenAddr, lis, config)
+	if err != nil {
+		log.Fatalf("failed to create and start inventory server")
+	}
+}
+
+// todo: Maybe decouple the data store choice here from the grpc server startup
+func NewInventoryDbClient(listenAddr string, lis net.Listener, config *config.Config) (context.Context, *inventorydb.DbClient, error) {
 	serverAPI := options.ServerAPI(options.ServerAPIVersion1)
-	opts := options.Client().ApplyURI("mongodb+srv://hotdegs:.mongodb.net/?retryWrites=true&w=majority").SetServerAPIOptions(serverAPI)
-	// Create a new client and connect to the server
+	connStr := "mongodb+srv://" + config.MongoDb.Username + ":" + config.MongoDb.Password + "@cluster0.c1xy1s5.mongodb.net/?retryWrites=true&w=majority"
+	opts := options.Client().ApplyURI(connStr).SetServerAPIOptions(serverAPI)
+
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
 
 	client, err := inventorydb.NewInventoryDbClient(ctx, opts)
+	if err != nil {
+		return nil, nil, err
+	}
+
 	server := grpc.NewServer()
 	pb.RegisterInventoryServiceServer(server, client)
 
 	log.Printf("gRPC server listening on %s", listenAddr)
 	if err := server.Serve(lis); err != nil {
-		log.Fatalf("failed to serve: %v", err)
+		return nil, nil, err
 	}
-	resp, createErr := client.CreateInventory(ctx, &pb.CreateInventoryRequest{})
-	if createErr != nil {
-		log.Fatalf("failed to create inventory: %v", createErr)
-	}
-	fmt.Print(resp)
+
+	return ctx, client, nil
 }
