@@ -1,4 +1,4 @@
-package inventorydb
+package grpcapi
 
 import (
 	"context"
