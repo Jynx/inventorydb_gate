@@ -2,17 +2,18 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"net"
-	"config"
-	"inventorydb"
-	"pb"
 	"time"
 
 	"github.com/joho/godotenv"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/reflection"
+
+	"github.com/jynx/inventorydb-gate/config"
+	"github.com/jynx/inventorydb-gate/inventorydb"
+	"github.com/jynx/inventorydb-gate/pb"
 )
 
 func init() {
@@ -30,8 +31,8 @@ func main() {
 		log.Fatalf("failed to listen: %v", err)
 	}
 
-	_, _ err := NewInventoryDbClient(listenAddr, lis, config)
-	if err != nil {
+	_, _, clientErr := NewInventoryDbClient(listenAddr, lis, config)
+	if clientErr != nil {
 		log.Fatalf("failed to create and start inventory server")
 	}
 }
@@ -51,7 +52,7 @@ func NewInventoryDbClient(listenAddr string, lis net.Listener, config *config.Co
 	}
 
 	server := grpc.NewServer()
-	pb.RegisterInventoryServiceServer(server, client)
+	pb.RegisterInventoryDBGateServiceServer(server, client)
 	reflection.Register(server)
 
 	log.Printf("gRPC server listening on %s", listenAddr)

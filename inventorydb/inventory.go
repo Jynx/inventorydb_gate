@@ -14,7 +14,7 @@ import (
 
 type DbClient struct {
 	client *mongo.Client
-	pb
+	pb.UnimplementedInventoryDBGateServiceServer
 }
 
 type Item struct {
@@ -30,7 +30,7 @@ type Inventory struct {
 	Items    []Item `bson:"items,omitempty"`
 }
 
-func (db DbClient) CreateInventory(ctx context.Context, request *pb.CreateInventoryRequest) (*pb.GetInventoryResponse, error) {
+func (db DbClient) CreateInventory(ctx context.Context, request *pb.CreateInventoryRequest) (*pb.CreateInventoryResponse, error) {
 	collection := db.client.Database("player_inventory").Collection("inventory")
 
 	// input validation
@@ -39,19 +39,17 @@ func (db DbClient) CreateInventory(ctx context.Context, request *pb.CreateInvent
 		PlayerId: "12345678",
 	}
 
-	result, err := collection.InsertOne(ctx, newInventory)
+	_, err := collection.InsertOne(ctx, newInventory)
 	if err != nil {
 		fmt.Printf("error from insert: %s", err)
 	}
 
-	response := &pb.GetInventoryResponse{
+	response := &pb.CreateInventoryResponse{
 		Inventory: &pb.Inventory{
 			PlayerId: "1",
 			Items:    []*pb.Item{{Id: "1", Name: "Axe"}},
 		},
 	}
-	// get rid of this
-	fmt.Println(result)
 	return response, nil
 }
 

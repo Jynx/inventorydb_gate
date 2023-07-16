@@ -1,11 +1,13 @@
 build:
-	go build main.go
+	go build -o bin/main main.go
 run:
 	go run main.go
 clean:
-	go run clean
+	rm -rf bin/main
 debug:
 	dlv debug --api-version=2 --log=true --config=debug.json
+tidy:
+	go mod tidy
 proto:
 	rm -rf pb/*
 	protoc --proto_path=protobufs --go_out=pb --go_opt=paths=source_relative \

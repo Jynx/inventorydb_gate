@@ -3,6 +3,8 @@ package inventorydb
 import (
 	"context"
 	"testing"
+
+	"github.com/jynx/inventorydb-gate/pb"
 )
 
 type MockDocumentDataStore struct {
