@@ -5,11 +5,11 @@ import (
 	"fmt"
 	"log"
 	"net"
-	"playerInventory/config"
-	"playerInventory/inventorydb"
+	"config"
+	"inventorydb"
+	"pb"
 	"time"
 
-	pb "github.com/Jynx/inventoryProtos/inventory"
 	"github.com/joho/godotenv"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"google.golang.org/grpc"
@@ -52,6 +52,7 @@ func NewInventoryDbClient(listenAddr string, lis net.Listener, config *config.Co
 
 	server := grpc.NewServer()
 	pb.RegisterInventoryServiceServer(server, client)
+	reflection.Register(server)
 
 	log.Printf("gRPC server listening on %s", listenAddr)
 	if err := server.Serve(lis); err != nil {

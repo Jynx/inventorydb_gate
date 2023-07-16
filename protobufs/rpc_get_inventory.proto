@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package pb;
+
+import "inventory.proto";
+
+option go_package="github.com/jynx/player-inventory/pb";
+
+message GetInventoryResponse {
+    Inventory inventory = 1;
+}
+  
+message GetInventoryRequest {
+    string player_id= 1;
+}

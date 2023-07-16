@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package pb;
+
+option go_package="github.com/jynx/player-inventory/pb";
+  
+message Item {
+    string id = 1;
+    string name = 2;
+}
+  
+message Inventory {
+    string playerId = 1;
+    repeated Item items = 2;
+}
+  

@@ -2,7 +2,6 @@ package inventorydb
 
 import (
 	"context"
-	pb "github.com/Jynx/inventoryProtos/inventory"
 	"testing"
 )
 
