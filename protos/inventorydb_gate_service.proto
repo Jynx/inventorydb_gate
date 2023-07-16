@@ -5,11 +5,22 @@ package pb;
 import "rpc_create_inventory.proto";
 import "rpc_get_inventory.proto";
 
+import "google/api/annotations.proto";
+
 option go_package="github.com/jynx/player-inventory/pb";
 
 service InventoryDBGateService {
-    rpc GetInventory(GetInventoryRequest) returns (GetInventoryResponse);
-    rpc CreateInventory(CreateInventoryRequest) returns (CreateInventoryResponse);
+    rpc GetInventory(GetInventoryRequest) returns (GetInventoryResponse) {
+        option (google.api.http) = {
+            get: "/v1/inventory/{player_id}"
+        };
+    };
+    rpc CreateInventory(CreateInventoryRequest) returns (CreateInventoryResponse) {
+        option (google.api.http) = {
+            post: "/v1/inventory/{player_id}"
+            body: "*"
+        };
+    };
 }
 
   

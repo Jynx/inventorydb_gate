@@ -8,7 +8,8 @@ type mongoDbConfig struct {
 }
 
 type serverConfig struct {
-	Port string
+	GRPCPort string
+	HTTPPort string
 }
 
 type Config struct {
@@ -23,7 +24,8 @@ func NewConfig() *Config {
 			Password: getEnv("MONGO_DB_PW", ""),
 		},
 		serverConfig{
-			Port: getEnv("PORT", "8080"),
+			GRPCPort: getEnv("GRPC_PORT", "50051"),
+			HTTPPort: getEnv("HTTP_PORT", "8080"),
 		},
 	}
 }

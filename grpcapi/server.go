@@ -14,7 +14,7 @@ type DbClient struct {
 	pb.UnimplementedInventoryDBGateServiceServer
 }
 
-func NewInventoryDbClient(ctx context.Context, opts *options.ClientOptions) (*DbClient, error) {
+func NewInventoryDbServer(ctx context.Context, opts *options.ClientOptions) (*DbClient, error) {
 	client, err := mongo.Connect(ctx, opts)
 	if err != nil {
 		return nil, err
