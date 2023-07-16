@@ -12,7 +12,7 @@ import (
 	"google.golang.org/grpc/reflection"
 
 	"github.com/jynx/inventorydb-gate/config"
-	"github.com/jynx/inventorydb-gate/inventorydb"
+	inventorydb "github.com/jynx/inventorydb-gate/grpcapi"
 	"github.com/jynx/inventorydb-gate/pb"
 )
 
