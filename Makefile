@@ -10,8 +10,8 @@ tidy:
 	go mod tidy
 proto:
 	rm -rf pb/*
-	protoc --proto_path=protobufs --go_out=pb --go_opt=paths=source_relative \
+	protoc --proto_path=protos --go_out=pb --go_opt=paths=source_relative \
 	--go-grpc_out=pb --go-grpc_opt=paths=source_relative \
-	protobufs/*.proto
+	protos/*.proto
 
 .PHONY: debug proto
