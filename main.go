@@ -25,25 +25,28 @@ func init() {
 }
 
 func main() {
-	config := config.NewConfig()
+	config := config.LoadConfig()
 
 	go func() {
-		err := StartGrpcGatewayServer(":"+config.Server.HTTPPort, config)
+		err := StartGrpcGatewayServer(config)
 		if err != nil {
 			log.Fatalf("failed to create and start inventory http server: %s", err)
 		}
 	}()
 
-	err := StartGrpcServer(":"+config.Server.GRPCPort, config)
+	err := StartGrpcServer(config)
 	if err != nil {
 		log.Fatalf("failed to create and start inventory grpc server: %s", err)
 	}
 }
 
-func StartGrpcServer(listenAddr string, config *config.Config) error {
+func StartGrpcServer(config *config.Config) error {
+	mongoConfig := config.MongoDb
+	serverConfig := config.Server
+	mongoDbHost := mongoConfig.Host + ":" + mongoConfig.Port
+	mdbConnStr := mongoConfig.Protocol + "://" + mongoConfig.Username + ":" + mongoConfig.Password + "@" + mongoDbHost + "/inventorydb" + "?authMode=scram-sha1"
 	serverAPI := options.ServerAPI(options.ServerAPIVersion1)
-	connStr := "mongodb+srv://" + config.MongoDb.Username + ":" + config.MongoDb.Password + "@cluster0.c1xy1s5.mongodb.net/?retryWrites=true&w=majority"
-	opts := options.Client().ApplyURI(connStr).SetServerAPIOptions(serverAPI)
+	opts := options.Client().ApplyURI(mdbConnStr).SetServerAPIOptions(serverAPI)
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
@@ -57,9 +60,10 @@ func StartGrpcServer(listenAddr string, config *config.Config) error {
 	pb.RegisterInventoryDBGateServiceServer(server, client)
 	reflection.Register(server)
 
+	listenAddr := ":" + serverConfig.GRPCPort
 	lis, err := net.Listen("tcp", listenAddr)
 	if err != nil {
-		log.Fatalf("failed to listen: %v", err)
+		return err
 	}
 
 	log.Printf("gRPC server listening on %s", listenAddr)
@@ -70,10 +74,13 @@ func StartGrpcServer(listenAddr string, config *config.Config) error {
 	return nil
 }
 
-func StartGrpcGatewayServer(listenAddr string, config *config.Config) error {
+func StartGrpcGatewayServer(config *config.Config) error {
+	mongoConfig := config.MongoDb
+	serverConfig := config.Server
+	mongoDbHost := mongoConfig.Host + ":" + mongoConfig.Port
+	mdbConnStr := mongoConfig.Protocol + "://" + mongoConfig.Username + ":" + mongoConfig.Password + "@" + mongoDbHost + "/inventorydb" + "?authMode=scram-sha1"
 	serverAPI := options.ServerAPI(options.ServerAPIVersion1)
-	connStr := "mongodb+srv://" + config.MongoDb.Username + ":" + config.MongoDb.Password + "@cluster0.c1xy1s5.mongodb.net/?retryWrites=true&w=majority"
-	opts := options.Client().ApplyURI(connStr).SetServerAPIOptions(serverAPI)
+	opts := options.Client().ApplyURI(mdbConnStr).SetServerAPIOptions(serverAPI)
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
@@ -89,6 +96,7 @@ func StartGrpcGatewayServer(listenAddr string, config *config.Config) error {
 		return err
 	}
 
+	listenAddr := ":" + serverConfig.HTTPPort
 	mux := http.NewServeMux()
 	mux.Handle("/", grpcMux)
 

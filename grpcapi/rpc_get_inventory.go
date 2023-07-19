@@ -27,7 +27,7 @@ type GetInventoryFilter struct {
 }
 
 func (db DbClient) GetInventory(ctx context.Context, req *pb.GetInventoryRequest) (*pb.GetInventoryResponse, error) {
-	collection := db.client.Database("player_inventory").Collection("inventory")
+	collection := db.client.Database("inventorydb").Collection("inventory")
 	filter := GetInventoryFilter{PlayerId: req.PlayerId}
 
 	filterDoc, err := bson.Marshal(filter)
